@@ -32,37 +32,45 @@ use IEEE.NUMERIC_STD.ALL;
 --use UNISIM.VComponents.all;
 
 entity framebuffer is
-  generic(
-    DATA : integer := 16;
-    ADDR : integer := 4096
-  );
-  Port ( 
-    clk1, en1, en2, ld : in std_logic;
-    addr1, addr2 : in std_logic_vector(11 downto 0);
-    wr_en1 : in std_logic;
-    din1: in std_logic_vector(15 downto 0);
-    dout1, dout2 : out std_logic_vector(15 downto 0));
+    generic(
+        DATA : integer := 16;
+        ADDR : integer := 12
+    );
+    Port (
+        clk1, en1, en2, ld : in std_logic;
+        addr1, addr2 : in std_logic_vector(ADDR-1 downto 0);
+        wr_en1 : in std_logic;
+        din1: in std_logic_vector(15 downto 0);
+        dout1, dout2 : out std_logic_vector(15 downto 0));
 end framebuffer;
 
 architecture Behavioral of framebuffer is
 
     -- memory 
-    type mem_type is array (0 to (2**12)-1) of std_logic_vector(16-1 downto 0);
+    type mem_type is array (0 to (2**ADDR)-1) of std_logic_vector(DATA-1 downto 0);
     signal mem: mem_type := (others=>(others=>'0'));
+    signal count: integer;
 begin
 
     --Port A 
     process(clk1)
     begin
-        if rising_edge(clk1) and en1 = '1' then
-            if(wr_en1 = '1') then
-                mem(to_integer(unsigned(addr1))) <= din1;
+        if rising_edge(clk1) then
+            if ld ='1' then --synchronous reset, line needs to be held high for 4096 cycles for complete reset.
+                if(count <= 4095) then 
+                    count <= count + 1;
+                    mem(count) <= x"00";
+                else
+                    count <= 0;
+                end if;
+            elsif en1 = '1' then
+                if(wr_en1 = '1') then
+                    mem(to_integer(unsigned(addr1))) <= din1;
+                end if;
+                dout1 <= mem(to_integer(unsigned(addr1)));
             end if;
-            if(ld = '1') then 
-               mem <= (others=>(others=>'0'));
-            end if;
-            dout1 <= mem(to_integer(unsigned(addr1)));
         end if;
+
     end process;
 
     --Port B 

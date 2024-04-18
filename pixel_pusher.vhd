@@ -38,20 +38,20 @@ entity pixel_pusher is
         HCOUNT: in STD_LOGIC_VECTOR(9 downto 0);
         R,B: out STD_LOGIC_VECTOR(4 downto 0);
         G: out STD_LOGIC_VECTOR(5 downto 0);
-        ADDR: out STD_LOGIC_VECTOR(17 downto 0));
+        ADDR: out STD_LOGIC_VECTOR(11 downto 0));
 end pixel_pusher;
 
 architecture Behavioral of pixel_pusher is
 
-    signal addr_counter: STD_LOGIC_VECTOR(17 downto 0);
+    signal addr_counter: STD_LOGIC_VECTOR(11 downto 0);
 begin
     ADDR<=addr_counter;
     addr_proc:process(CLK)
     begin
         if(rising_edge(CLK)) then
             if(EN='1' and VID = '1' and unsigned(HCOUNT)<481) then
-                R <= PIXEL(15 downto 10);
-                G <= PIXEL(9 downto 5);
+                R <= PIXEL(15 downto 11);
+                G <= PIXEL(10 downto 5);
                 B <= PIXEL(4 downto 0);
                 addr_counter<=std_logic_vector(unsigned(addr_counter)+1);
             else

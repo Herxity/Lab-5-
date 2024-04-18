@@ -59,7 +59,7 @@ begin
             if ld ='1' then --synchronous reset, line needs to be held high for 4096 cycles for complete reset.
                 if(count <= 4095) then 
                     count <= count + 1;
-                    mem(count) <= x"00";
+                    mem(count) <= b"0000000000000000";
                 else
                     count <= 0;
                 end if;
